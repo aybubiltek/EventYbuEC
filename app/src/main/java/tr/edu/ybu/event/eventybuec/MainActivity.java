@@ -3,10 +3,13 @@ package tr.edu.ybu.event.eventybuec;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import org.json.JSONException;
+import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -33,7 +36,12 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View view) {
                 Login login = new Login();
-                login.execute("http://api.geonames.org/citiesJSON?north=44.1&south=-9.9&east=-22.4&west=55.2&lang=de&username=demo");
+                String[] request = {
+                        "http://event.ybu.edu.tr/api/login",
+                        email.getText().toString(),
+                        pass.getText().toString()
+                };
+                login.execute(request);
             }
         });
 
@@ -50,11 +58,17 @@ public class MainActivity extends Activity {
 
         @Override
         protected String doInBackground(String... str) {
-            InputStream in = null;
-            URL url = null;
-            String text = null;
+            InputStream in;
+            URL url;
+            StringBuilder text = new StringBuilder();
             try {
-                url = new URL(str[0]);
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("login", str[1]);
+                jsonObject.put("pass", str[2]);
+                jsonObject.put("dev_id", Helper.GetDeviceID(MainActivity.this.getApplicationContext()));
+                jsonObject.put("timestamp", Helper.GetTimestamp());
+
+                url = new URL(str[0] + "?basehash=" + Helper.Base64Encode(jsonObject.toString()));
                 URLConnection urlConn = url.openConnection();
                 HttpURLConnection httpConn = (HttpURLConnection)urlConn;
                 httpConn.setAllowUserInteraction(false);
@@ -64,29 +78,68 @@ public class MainActivity extends Activity {
                 resCode = httpConn.getResponseCode();
                 if (resCode == HttpURLConnection.HTTP_OK) {
                     in = httpConn.getInputStream();
+                    InputStreamReader isr = new InputStreamReader(in);
+                    int charRead;
+                    char[] inputBuffer = new char[2000];
+                    while ((charRead = isr.read(inputBuffer))>0) {
+                        String readString = String.copyValueOf(inputBuffer, 0, charRead);
+                        text.append(readString);
+                        inputBuffer = new char[2000];
+                    }
                 }
-                InputStreamReader isr = new InputStreamReader(in);
-                int charRead;
-                char[] inputBuffer = new char[2000];
-
-                while ((charRead = isr.read(inputBuffer))>0) {
-                    String readString =
-                            String.copyValueOf(inputBuffer, 0, charRead);
-                    text += readString;
-                    inputBuffer = new char[2000];
-                }
-
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-            return text;
+            return text.toString();
         }
 
         @Override
         protected void onPostExecute(String result) {
-            Toast.makeText(MainActivity.this, result, Toast.LENGTH_SHORT).show();
+            JSONObject responseBody;
+            try {
+                responseBody = new JSONObject(result);
+                String resCode = responseBody.get("code").toString();
+
+                    /*
+                    result codes:
+                        100: Eksik POST parametresi
+                        101: İstek zaman aşımı. formdaki timestamp verilerini güncelleyerek tekrar deneyin
+                        102: istek gövdesinde eksik bilgi
+                        103: basehash çözülemedi
+                        104: istek gövdesi hatalı.
+                        110: Email hatalı
+                        111: Şifre Hatalı
+                        120: Kullanıcı Bulunamadı
+                        121: Kullanıcının giriş yetkisi yok.
+                     */
+                switch (resCode){
+                    case "101":
+                        Log.d("Hata " , "Zaman aşımı");
+                        break;
+                    case "110":
+                        Log.d("Hata " , "Email hatalı");
+                        break;
+                    case "111":
+                        Log.d("Hata " , "Şifre hatalı");
+                        break;
+                    case "120":
+                        Log.d("Hata " , "Kullanıcı bulunamadı");
+                        break;
+                    case "121":
+                        Log.d("Hata " , "Kullanıcının giriş yetkisi yok");
+                        break;
+                    default:
+                        Log.d("Res Code: " , "hata");
+                        break;
+                }
+                Toast.makeText(MainActivity.this, result, Toast.LENGTH_SHORT).show();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
