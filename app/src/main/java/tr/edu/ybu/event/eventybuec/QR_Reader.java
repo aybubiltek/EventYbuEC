@@ -1,7 +1,10 @@
 package tr.edu.ybu.event.eventybuec;
 
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.util.Log;
@@ -14,6 +17,17 @@ import com.google.android.gms.vision.barcode.Barcode;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Iterator;
+
+import javax.net.ssl.HttpsURLConnection;
 
 
 public class QR_Reader extends Activity implements View.OnClickListener {
@@ -29,7 +43,7 @@ public class QR_Reader extends Activity implements View.OnClickListener {
     Button btn;
 
     public static String event_id = "";
-
+    public static String qrhash = "";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,15 +81,8 @@ public class QR_Reader extends Activity implements View.OnClickListener {
                     Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
                     statusMessage.setText("Başarılı");
                     barcodeValue.setText(barcode.displayValue);
-
-                    JSONObject json = new JSONObject();
-                    try {
-                        json.put("qr", barcode.displayValue);
-                        json.put("event_id", event_id);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    Log.d(TAG, "Barcode read: " + barcode.displayValue);
+                    QR_Reader.qrhash = barcode.displayValue;
+                    new SendPostRequest().execute();
                 } else {
                     statusMessage.setText("Hata");
                     Log.d(TAG, "No barcode captured, intent data is null");
@@ -90,5 +97,187 @@ public class QR_Reader extends Activity implements View.OnClickListener {
     }
 
 
+    public class SendPostRequest extends AsyncTask<String, Void, String> {
+
+        protected void onPreExecute(){}
+
+        protected String doInBackground(String... arg0) {
+
+            try {
+                URL url = new URL(Helper.url + "api/qr");
+                JSONObject postDataParams = new JSONObject();
+
+                //token, kullanici_id, etkinlik_id, qrhash
+                postDataParams.put("token", MainActivity.token);
+                postDataParams.put("kullanici_id", MainActivity.kullanici_id);
+                postDataParams.put("qrhash", QR_Reader.qrhash);
+                postDataParams.put("etkinlik_id", event_id);
+
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setReadTimeout(15000 /* milliseconds */);
+                conn.setConnectTimeout(15000 /* milliseconds */);
+                conn.setRequestMethod("POST");
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+
+                OutputStream os = conn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(os, "UTF-8"));
+                writer.write(getPostDataString(postDataParams));
+
+                writer.flush();
+                writer.close();
+                os.close();
+
+                int responseCode=conn.getResponseCode();
+                if (responseCode == HttpsURLConnection.HTTP_OK) {
+                    BufferedReader in=new BufferedReader(
+                            new InputStreamReader(
+                                    conn.getInputStream()));
+                    StringBuffer sb = new StringBuffer("");
+                    String line="";
+                    while((line = in.readLine()) != null) {
+                        sb.append(line);
+                        break;
+                    }
+                    in.close();
+                    return sb.toString();
+                }
+                else {
+                    return new String("false : "+responseCode);
+                }
+            }
+            catch(Exception e){
+                return new String("Exception: " + e.getMessage());
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String res) {
+            try {
+                JSONObject jsonObject = new JSONObject(res);
+                if(jsonObject.getBoolean("result")){
+                   String name = jsonObject.getString("data");
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(QR_Reader.this);
+                    builder.setMessage(name)
+                            .setCancelable(true)
+                            .setPositiveButton("TAMAM", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    new SendPostRequestConfirm().execute();
+                                }
+                            });
+                    builder.setNegativeButton("İPTAL", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            Helper.alert("CANCEL", QR_Reader.this);
+                        }
+                    });
+
+                    AlertDialog alert = builder.create();
+                    alert.show();
+
+                } else {
+
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public String getPostDataString(JSONObject params) throws Exception {
+        StringBuilder result = new StringBuilder();
+        boolean first = true;
+        Iterator<String> itr = params.keys();
+        while(itr.hasNext()){
+            String key= itr.next();
+            Object value = params.get(key);
+            if (first)
+                first = false;
+            else
+                result.append("&");
+
+            result.append(URLEncoder.encode(key, "UTF-8"));
+            result.append("=");
+            result.append(URLEncoder.encode(value.toString(), "UTF-8"));
+        }
+        return result.toString();
+    }
+
+
+
+    public class SendPostRequestConfirm extends AsyncTask<String, Void, String> {
+
+        protected void onPreExecute(){}
+
+        protected String doInBackground(String... arg0) {
+
+            try {
+                URL url = new URL(Helper.url + "api/qr");
+                JSONObject postDataParams = new JSONObject();
+
+                //token, kullanici_id, etkinlik_id, qrhash
+                postDataParams.put("token", MainActivity.token);
+                postDataParams.put("kullanici_id", MainActivity.kullanici_id);
+                postDataParams.put("qrhash", QR_Reader.qrhash);
+                postDataParams.put("etkinlik_id", event_id);
+
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setReadTimeout(15000 /* milliseconds */);
+                conn.setConnectTimeout(15000 /* milliseconds */);
+                conn.setRequestMethod("POST");
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+
+                OutputStream os = conn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(os, "UTF-8"));
+                writer.write(getPostDataString(postDataParams));
+
+                writer.flush();
+                writer.close();
+                os.close();
+
+                int responseCode=conn.getResponseCode();
+                if (responseCode == HttpsURLConnection.HTTP_OK) {
+                    BufferedReader in=new BufferedReader(
+                            new InputStreamReader(
+                                    conn.getInputStream()));
+                    StringBuffer sb = new StringBuffer("");
+                    String line="";
+                    while((line = in.readLine()) != null) {
+                        sb.append(line);
+                        break;
+                    }
+                    in.close();
+                    return sb.toString();
+                }
+                else {
+                    return new String("false : "+responseCode);
+                }
+            }
+            catch(Exception e){
+                return new String("Exception: " + e.getMessage());
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String res) {
+            try {
+                JSONObject jsonObject = new JSONObject(res);
+                if(jsonObject.getBoolean("result")){
+                    String name = jsonObject.getString("data");
+
+
+                } else {
+
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
 }

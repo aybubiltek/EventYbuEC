@@ -7,14 +7,14 @@
     android:layout_height="match_parent"
     android:keepScreenOn="true">
 
-    <tr.edu.ybu.event.eventybu.sample.CameraSourcePreview
+    <tr.edu.ybu.event.eventybuec.sample.CameraSourcePreview
         android:id="@+id/preview"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    </tr.edu.ybu.event.eventybu.sample.CameraSourcePreview>
+    </tr.edu.ybu.event.eventybuec.sample.CameraSourcePreview>
 
-    <tr.edu.ybu.event.eventybu.sample.GraphicOverlay
+    <tr.edu.ybu.event.eventybuec.sample.GraphicOverlay
         android:id="@+id/graphicOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

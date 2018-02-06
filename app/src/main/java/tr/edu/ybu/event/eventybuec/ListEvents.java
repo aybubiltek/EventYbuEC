@@ -40,13 +40,8 @@ public class ListEvents extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list_events);
         Intent i = getIntent();
-        int kullanici_id = i.getIntExtra("kullanici_id", 0);
-        String token = i.getStringExtra("token");
-        new SendPostRequest().execute(Integer.toString(kullanici_id), token);
+        new SendPostRequest().execute(Integer.toString(MainActivity.kullanici_id), MainActivity.token);
         listView = findViewById(R.id.list_view);
-        Helper.alert(token, ListEvents.this);
-
-
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
@@ -134,7 +129,6 @@ public class ListEvents extends Activity {
                                         object.getString("kulup_ad")+")"
                         );
 
-                        Helper.alert(object.getString("ad"), ListEvents.this);
                         idList[i] = object.getString("id");
                     }
 
