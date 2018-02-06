@@ -1,20 +1,18 @@
 package tr.edu.ybu.event.eventybuec;
 
 
+import android.app.AlertDialog;
 import android.content.Context;
-import android.util.Base64;
+import android.content.DialogInterface;
 import android.provider.Settings.Secure;
-import java.nio.charset.Charset;
 
 /**
  * Created by DeXCoder on 18-Jan-18.
  */
 
 public class Helper {
-    public static String Base64Encode(String text){
-        return Base64.encodeToString(text.getBytes(Charset.forName("UTF-8")), Base64.DEFAULT);
-    }
 
+    public static String url = "http://192.168.153.136/";
     public static String GetDeviceID(Context ctx){
         return Secure.getString(ctx.getContentResolver(), Secure.ANDROID_ID);
     }
@@ -24,5 +22,18 @@ public class Helper {
         return tsLong.toString();
     }
 
+    public static void alert(String msg, Context ctx){
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+        builder.setMessage(msg)
+                .setCancelable(false)
+                .setPositiveButton("TAMAM", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
 
 }

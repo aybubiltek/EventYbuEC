@@ -1,18 +1,13 @@
 package tr.edu.ybu.event.eventybuec;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
@@ -25,27 +20,23 @@ import java.util.Iterator;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class MainActivity extends Activity {
+/**
+ * Created by DeXCoder on 06-Feb-18.
+ */
 
-    TextView email, pass;
-    Button loginBtn;
+public class ListEvents extends Activity {
 
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.list_events);
+        Intent i = getIntent();
+        int kullanici_id = i.getIntExtra("kullanici_id", 0);
+        String token = i.getStringExtra("token");
+        new SendPostRequest().execute(Integer.toString(kullanici_id), token);
 
-        email = findViewById(R.id.email);
-        pass = findViewById(R.id.password);
-        loginBtn = findViewById(R.id.loginBtn);
-
-        loginBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new SendPostRequest().execute();
-            }
-        });
+        Helper.alert(token, ListEvents.this);
     }
+
 
 
     public class SendPostRequest extends AsyncTask<String, Void, String> {
@@ -55,15 +46,11 @@ public class MainActivity extends Activity {
         protected String doInBackground(String... arg0) {
 
             try {
-                URL url = new URL(Helper.url + "api/login");
+                URL url = new URL(Helper.url + "api/events");
                 JSONObject postDataParams = new JSONObject();
-                String uname = email.getText().toString();
-                String password = pass.getText().toString();
 
-                postDataParams.put("login", uname);
-                postDataParams.put("pass", password);
-                postDataParams.put("dev_id", Helper.GetDeviceID(MainActivity.this));
-                postDataParams.put("timestamp", Helper.GetTimestamp());
+                postDataParams.put("kullanici_id", arg0[0]);
+                postDataParams.put("token", arg0[1]);
 
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setReadTimeout(15000 /* milliseconds */);
@@ -107,6 +94,8 @@ public class MainActivity extends Activity {
         @Override
         protected void onPostExecute(String res) {
 
+            Helper.alert(res, ListEvents.this);
+            /*
             try {
                 JSONObject jsonObject = new JSONObject(res);
                 int code = jsonObject.getInt("code");
@@ -115,37 +104,15 @@ public class MainActivity extends Activity {
                 if(result){
                     String token = jsonObject.getString("token");
                     int kullanici_id = jsonObject.getInt("kullanici_id");
-                    Intent intent = new Intent(MainActivity.this , ListEvents.class);
-                    intent.putExtra("kullanici_id", kullanici_id);
-                    intent.putExtra("token", token);
-                    startActivity(intent);
-                    finish();
+
                 } else {
-                    switch (code){
-                        case 100:
-                            Helper.alert("Eksik alan bırakmayınız", MainActivity.this);
-                            break;
-                        case  101:
-                            Helper.alert("İstek zaman aşımı", MainActivity.this);
-                            break;
-                        case  110:
-                            Helper.alert("Email hatalı", MainActivity.this);
-                            break;
-                        case  111:
-                            Helper.alert("Şifre hatalı", MainActivity.this);
-                            break;
-                        case  120:
-                            Helper.alert("Kullanıcı bulunamadı", MainActivity.this);
-                            break;
-                        case  121:
-                            Helper.alert("Kullanıcının giriş yetkisi yok", MainActivity.this);
-                            break;
-                    }
+
                 }
 
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+            */
         }
     }
 
@@ -167,6 +134,4 @@ public class MainActivity extends Activity {
         }
         return result.toString();
     }
-
-
 }
