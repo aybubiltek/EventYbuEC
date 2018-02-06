@@ -6,9 +6,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import org.json.JSONException;
@@ -27,19 +29,18 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends Activity {
 
-    TextView email, pass;
-    Button loginBtn;
-    public static String token;
-    public static int kullanici_id;
+    EditText email;
+    EditText pass;
+    TextView loginBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        email = findViewById(R.id.email);
-        pass = findViewById(R.id.password);
-        loginBtn = findViewById(R.id.loginBtn);
+        email = (EditText) findViewById(R.id.email);
+        pass = (EditText) findViewById(R.id.password);
+        loginBtn = (TextView)findViewById(R.id.loginBtn);
 
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,9 +116,11 @@ public class MainActivity extends Activity {
                 boolean result = jsonObject.getBoolean("result");
 
                 if(result){
-                    MainActivity.token = jsonObject.getString("token");
-                    MainActivity.kullanici_id = jsonObject.getInt("kullanici_id");
+                    String token = jsonObject.getString("token");
+                    int kullanici_id = jsonObject.getInt("kullanici_id");
                     Intent intent = new Intent(MainActivity.this , ListEvents.class);
+                    intent.putExtra("kullanici_id", kullanici_id);
+                    intent.putExtra("token", token);
                     startActivity(intent);
                     finish();
                 } else {

@@ -1,36 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:background="@drawable/bg">
+
+<FrameLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:orientation="vertical">
+    android:background="@drawable/bgrect"
+    >
+</FrameLayout>
 
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    >
 
-    <EditText
-        android:id="@+id/email"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30sp"
-        android:ems="10"
-        android:text="1105022040@ybu.edu.tr"
-        android:hint="email"
-        android:inputType="textPersonName" />
+    <TextView
+        android:id="@+id/wolf"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:textColor="#ffffff"
+        android:background="@drawable/logo"
+        android:layout_marginTop="50dp"
+        android:layout_centerHorizontal="true"/>
 
-    <EditText
-        android:id="@+id/password"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10sp"
-        android:ems="10"
-        android:hint="şifre"
-        android:text="111111"
-        android:inputType="textPassword" />
-
-    <Button
+    <TextView
         android:id="@+id/loginBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10sp"
-        android:text="Giriş Yap" />
-</LinearLayout>
+        android:text="@string/sign_in"
+        android:textColor="#ffffff"
+        android:textSize="19dp"
+        android:padding="16dp"
+        android:gravity="center"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/rect"
+        android:layout_marginBottom="35dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="200dp">
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp">
+            <EditText
+                android:textColor="#fff"
+                android:id="@+id/email"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:background="@drawable/rect1"
+                android:layout_marginTop="220dp"
+                android:hint="@string/email"
+                android:inputType="textEmailAddress"
+                android:maxEms="13"
+                android:textColorHint="#ffffff"
+                android:text="1105022040@ybu.edu.tr"
+                android:paddingLeft="20dp"
+                android:drawableLeft="@drawable/email"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:drawablePadding="16dp">
+            </EditText>
+        </android.support.design.widget.TextInputLayout>
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            >
+            <EditText
+                android:textColor="#fff"
+                android:id="@+id/password"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:background="@drawable/rect1"
+                android:layout_marginTop="20dp"
+                android:hint="@string/password"
+                android:inputType="textPassword"
+                android:textColorHint="#ffffff"
+                android:drawableLeft="@drawable/pass"
+                android:paddingLeft="20dp"
+                android:text="111111"
+                android:drawablePadding="16dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp">
+            </EditText>
+        </android.support.design.widget.TextInputLayout>
+    </LinearLayout>
+</RelativeLayout>
+
+
+
+</RelativeLayout>
