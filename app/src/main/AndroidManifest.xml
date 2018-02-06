@@ -23,6 +23,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".ListEvents"></activity>
+        <activity android:name=".QR_Reader"></activity>
+        <activity android:name=".BarcodeCaptureActivity"></activity>
 
     </application>
 

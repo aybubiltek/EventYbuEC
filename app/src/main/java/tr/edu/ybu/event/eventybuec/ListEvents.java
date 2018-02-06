@@ -4,7 +4,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -16,7 +21,9 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -25,6 +32,9 @@ import javax.net.ssl.HttpsURLConnection;
  */
 
 public class ListEvents extends Activity {
+    ListView listView;
+    String[] idList = new String[30];
+    List<String> items = new ArrayList<>();
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,8 +43,21 @@ public class ListEvents extends Activity {
         int kullanici_id = i.getIntExtra("kullanici_id", 0);
         String token = i.getStringExtra("token");
         new SendPostRequest().execute(Integer.toString(kullanici_id), token);
-
+        listView = findViewById(R.id.list_view);
         Helper.alert(token, ListEvents.this);
+
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent intent = new Intent(ListEvents.this, QR_Reader.class);
+                intent.putExtra("event_id", idList[i]);
+                startActivity(intent);
+            }
+        });
+
+
     }
 
 
@@ -94,7 +117,36 @@ public class ListEvents extends Activity {
         @Override
         protected void onPostExecute(String res) {
 
-            Helper.alert(res, ListEvents.this);
+
+            try {
+                JSONObject jsonObject = new JSONObject(res);
+                boolean result = jsonObject.getBoolean("result");
+                int code = jsonObject.getInt("code");
+                JSONArray data = jsonObject.getJSONArray("data");
+
+                if(result){
+                    for(int i=0;i<data.length();i++)
+                    {
+                        JSONObject object= data.getJSONObject(i);
+                        items.add(
+                                object.getString("ad") +
+                                        System.getProperty("line.separator")+ "("+
+                                        object.getString("kulup_ad")+")"
+                        );
+
+                        Helper.alert(object.getString("ad"), ListEvents.this);
+                        idList[i] = object.getString("id");
+                    }
+
+                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_list_item_1, items);
+                    if (listView != null) {
+                        listView.setAdapter(adapter);
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
             /*
             try {
                 JSONObject jsonObject = new JSONObject(res);
