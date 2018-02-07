@@ -80,11 +80,9 @@ public class QR_Reader extends Activity implements View.OnClickListener {
                 if (data != null) {
                     Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
                     statusMessage.setText("Başarılı");
-                    barcodeValue.setText(barcode.displayValue);
                     QR_Reader.qrhash = barcode.displayValue;
                     new SendPostRequest().execute();
                 } else {
-                    statusMessage.setText("Hata");
                     Log.d(TAG, "No barcode captured, intent data is null");
                 }
             } else {
@@ -214,7 +212,7 @@ public class QR_Reader extends Activity implements View.OnClickListener {
         protected String doInBackground(String... arg0) {
 
             try {
-                URL url = new URL(Helper.url + "api/qr");
+                URL url = new URL(Helper.url + "api/qr_confirm");
                 JSONObject postDataParams = new JSONObject();
 
                 //token, kullanici_id, etkinlik_id, qrhash
@@ -267,8 +265,21 @@ public class QR_Reader extends Activity implements View.OnClickListener {
             try {
                 JSONObject jsonObject = new JSONObject(res);
                 if(jsonObject.getBoolean("result")){
-                    String name = jsonObject.getString("data");
+                    boolean result = jsonObject.getBoolean("result");
+                    if(result){
 
+                        AlertDialog.Builder builder = new AlertDialog.Builder(QR_Reader.this);
+                        builder.setMessage("İşleminiz Tamamlanmıştır")
+                                .setCancelable(false)
+                                .setPositiveButton("TAMAM", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+
+                                    }
+                                });
+                        AlertDialog alert = builder.create();
+                        alert.show();
+
+                    }
 
                 } else {
 

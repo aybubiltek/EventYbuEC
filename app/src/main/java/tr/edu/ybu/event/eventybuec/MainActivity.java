@@ -33,6 +33,9 @@ public class MainActivity extends Activity {
     EditText pass;
     TextView loginBtn;
 
+    public static String token;
+    public static int kullanici_id;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,8 +119,8 @@ public class MainActivity extends Activity {
                 boolean result = jsonObject.getBoolean("result");
 
                 if(result){
-                    String token = jsonObject.getString("token");
-                    int kullanici_id = jsonObject.getInt("kullanici_id");
+                    MainActivity.token = jsonObject.getString("token");
+                    MainActivity.kullanici_id = jsonObject.getInt("kullanici_id");
                     Intent intent = new Intent(MainActivity.this , ListEvents.class);
                     intent.putExtra("kullanici_id", kullanici_id);
                     intent.putExtra("token", token);

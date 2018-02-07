@@ -51,8 +51,6 @@ public class ListEvents extends Activity {
                 startActivity(intent);
             }
         });
-
-
     }
 
 
@@ -117,9 +115,8 @@ public class ListEvents extends Activity {
                 JSONObject jsonObject = new JSONObject(res);
                 boolean result = jsonObject.getBoolean("result");
                 int code = jsonObject.getInt("code");
-                JSONArray data = jsonObject.getJSONArray("data");
-
                 if(result){
+                    JSONArray data = jsonObject.getJSONArray("data");
                     for(int i=0;i<data.length();i++)
                     {
                         JSONObject object= data.getJSONObject(i);
