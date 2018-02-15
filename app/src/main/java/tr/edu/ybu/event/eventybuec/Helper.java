@@ -12,7 +12,7 @@ import android.provider.Settings.Secure;
 
 public class Helper {
 
-    public static String url = "http://192.168.153.136/";
+    public static String url = "http://event.ybu.edu.tr/";
     public static String GetDeviceID(Context ctx){
         return Secure.getString(ctx.getContentResolver(), Secure.ANDROID_ID);
     }
